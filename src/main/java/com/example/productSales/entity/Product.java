@@ -1,9 +1,15 @@
 package com.example.productSales.entity;
 
+import jakarta.persistence.*;
+
 import java.util.List;
 
+@Entity
+@Table(name = "product")
 public class Product {
 
+    @Id
+    @GeneratedValue
     private Long id;
     private String name;
     private String description;
@@ -12,7 +18,19 @@ public class Product {
 
     private Integer quantity;
 
+
+    @OneToMany(
+            mappedBy = "product",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true,
+            fetch = FetchType.LAZY
+    )
     private List<Sale> sales;
+
+    public void addSale(Sale sale) {
+        sales.add(sale);
+        sale.setProduct(this);
+    }
 
     public Long getId() {
         return id;
