@@ -1,5 +1,6 @@
 package com.example.productSales.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -12,9 +13,15 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 
+import java.util.Arrays;
+import java.util.List;
+
 @Configuration
 @EnableMethodSecurity(prePostEnabled = true)
 public class SecurityConfig {
+
+    @Value("${app.security.allowed-ips}")
+    private String allowedIpsConfig;
 
     @Bean
     public UserDetailsService users(PasswordEncoder encoder) {
@@ -39,11 +46,17 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        List<String> allowedIps = Arrays.asList(allowedIpsConfig.split(","));
+
         http
-                .csrf(csrf -> csrf.disable()) // disable with lambda to avoid deprecation
+                .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
+                        // Swagger endpoints always allowed
                         .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
-                        .anyRequest().authenticated()
+                        // All other endpoints: allow only if from whitelisted IPs
+                        .requestMatchers(new IpAddressMatcher(allowedIps)).authenticated()
+                        // Deny anything not matching whitelist
+                        .anyRequest().denyAll()
                 )
                 .httpBasic();
 
