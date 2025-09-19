@@ -1,11 +1,16 @@
 package com.example.productSales.service;
 
+import com.example.productSales.controller.ProductController;
 import com.example.productSales.entity.Product;
 import com.example.productSales.entity.Sale;
 import com.example.productSales.exception.EntityNotFound;
 import com.example.productSales.repository.ProductRepository;
 import com.example.productSales.repository.SalesRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -21,20 +26,26 @@ public class ProductService {
     @Autowired
     private SalesRepository salesRepository;
 
-    public List<Product> getAllProducts(){
-        return productRepository.findAll();
+
+    private static final Logger log = LoggerFactory.getLogger(ProductController.class);
+
+    public Page<Product> getAllProducts(Pageable pageable){
+        log.info("Fetching all products, page: {}", pageable);
+        return productRepository.findAll(pageable);
     }
 
     public Product getProductById(long id){
+        log.info("Fetching product with id {}", id);
         return productRepository.findById(id).orElseThrow(()->new EntityNotFound("Product",id));
     }
 
     public Product addProduct(Product product){
+        log.info("Adding product {}", product.getName());
        return productRepository.save(product);
     }
 
     public Product updateProduct(Long id, Product product) {
-
+        log.info("Updating product id {}", id);
         Product existing = getProductById(id);
         existing.setName(product.getName());
         existing.setDescription(product.getDescription());
@@ -45,14 +56,15 @@ public class ProductService {
 
 
     public void deleteProduct(Long id) {
+        log.info("Deleting product id {}", id);
         Product p = getProductById(id);
         productRepository.delete(p);
     }
 
     public Sale addSale(Long productId, Integer quantity) {
-        //log.info("Adding sale for product {}: qty {}", productId, quantity);
+        log.info("Adding sale for product {}: qty {}", productId, quantity);
         Product product = getProductById(productId);
-        // reduce quantity
+
         if (product.getQuantity() < quantity) {
             throw new IllegalArgumentException("Insufficient quantity");
         }
@@ -65,10 +77,10 @@ public class ProductService {
     }
 
     public void deleteSale(Long saleId) {
-        //log.info("Deleting sale id {}", saleId);
+        log.info("Deleting sale id {}", saleId);
         Sale s = salesRepository.findById(saleId).orElseThrow(() -> new RuntimeException("Sale not found"));
         Product p = s.getProduct();
-        p.setQuantity(p.getQuantity() + s.getQuantity()); // restore stock
+        p.setQuantity(p.getQuantity() + s.getQuantity());
         p.getSales().remove(s);
         salesRepository.delete(s);
         productRepository.save(p);
@@ -90,7 +102,6 @@ public class ProductService {
         return totalRevenue;
     }
 
-    // ✅ Get revenue by product ID (no streams)
     public Double getRevenueByProduct(Long productId) {
         double revenue = 0.0;
 

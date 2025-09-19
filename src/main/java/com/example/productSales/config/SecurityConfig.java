@@ -25,7 +25,7 @@ public class SecurityConfig {
 
     @Bean
     public UserDetailsService users(PasswordEncoder encoder) {
-        // hardcoded users
+
         UserDetails user = User.withUsername("user")
                 .password(encoder.encode("userpass"))
                 .roles("USER")
@@ -51,11 +51,8 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        // Swagger endpoints always allowed
                         .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
-                        // All other endpoints: allow only if from whitelisted IPs
                         .requestMatchers(new IpAddressMatcher(allowedIps)).authenticated()
-                        // Deny anything not matching whitelist
                         .anyRequest().denyAll()
                 )
                 .httpBasic();

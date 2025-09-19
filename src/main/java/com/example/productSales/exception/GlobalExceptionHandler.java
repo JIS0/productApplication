@@ -39,11 +39,11 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(AccessDeniedException.class)
     public void handleAccessDeniedException(org.springframework.security.access.AccessDeniedException ex) {
-        throw ex; // rethrow so Spring Security filter handles it
+        throw ex;
     }
 
     @ExceptionHandler(AuthenticationException.class)
     public void handleAuthenticationException(org.springframework.security.core.AuthenticationException ex) {
-        throw ex; // rethrow so Spring Security filter handles it
+        throw ex;
     }
 }
