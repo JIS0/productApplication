@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -42,12 +43,14 @@ public class ProductController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity deleteProduct(@PathVariable Long id){
         productService.deleteProduct(id);
         return ResponseEntity.noContent().build();
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public Product updateProduct(@PathVariable Long id,@RequestBody Product product){
         return productService.updateProduct(id,product);
     }
@@ -59,6 +62,7 @@ public class ProductController {
     }
 
     @DeleteMapping("/sales/{saleId}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteSale(@PathVariable Long saleId) {
         productService.deleteSale(saleId);
         return ResponseEntity.noContent().build();
