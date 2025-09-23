@@ -37,8 +37,6 @@ TECH STACK
 SETUP INSTRUCTIONS
 ------------------------------------------------------------
 1. Clone the Repository
-   git clone https://github.com/your-username/product-sales-api.git
-   cd product-sales-api
 
 2. Configure MySQL
    Run MySQL locally (example with Docker):
